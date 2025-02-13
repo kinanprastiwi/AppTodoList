@@ -262,7 +262,7 @@
                                 handleDelete={handleDelete}
                                 handleDeleteSubtask={handleDeleteSubtask}
                                 handleSelectTask={handleSelectTask}
-                                isActive={index === activeTask}
+                                isActive={activeTask === index}
                             />
                         ))
                     )}
@@ -270,7 +270,7 @@
             );
         }
 
-        ReactDOM.createRoot(document.getElementById("app")).render(<TodoApp />);
+        ReactDOM.render(<TodoApp />, document.getElementById('app'));
     </script>
 </body>
 </html>
