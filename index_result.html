@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App - Modern Design</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            font-family: 'Arial', sans-serif;
+        }
+        #app {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-control {
+            border: 2px solid #a1a1a1;
+            border-radius: 25px;
+            padding: 10px 15px;
+        }
+        .btn-primary {
+            background-color: #0062cc;
+            border: none;
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #004bb5;
+        }
+        .task-item {
+            padding: 15px;
+            border: 1px solid #d1d1d1;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            background-color: #ffffff;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .task-item:hover {
+            background-color: #f7f9fc;
+            box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1);
+        }
+        .task-actions {
+            display: flex;
+            gap: 10px;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .task-active .task-actions {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .task-delete {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-radius: 15px;
+            padding: 5px 10px;
+            transition: background-color 0.3s ease;
+        }
+        .task-delete:hover {
+            background-color: #f5c6cb;
+        }
+        .form-check-input {
+            width: 20px;
+            height: 20px;
+        }
+        .task-subtasks {
+            margin-left: 30px;
+            padding-left: 15px;
+            border-left: 2px solid #d1d1d1;
+            margin-top: 10px;
+        }
+        .task-subtask-item {
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #f8f9fa;
+            padding: 5px 10px;
+            border-radius: 10px;
+        }
+        .task-subtask-delete {
+            color: #dc3545;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: color 0.3s;
+        }
+        .task-subtask-delete:hover {
+            color: #b21f2d;
+        }
+
+        @media (max-width: 768px) {
+  #todoApp h1 {
+    font-size: 1.5rem;
+  }
+}
+
+    </style>
+</head>
+<body>
+    <div id="app" class="container my-5"></div>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.14.3/babel.min.js"></script>
+    <script type="text/babel">
+        function FormInput({ handleChange, handleSubmit, activity }) {
+            return (
+                <form onSubmit={handleSubmit} className="d-flex gap-2 mb-3">
+                    <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Masukan aktivitas"
+                        onChange={handleChange}
+                        value={activity}
+                    />
+                    <button type="submit" className="btn btn-primary d-flex align-items-center">
+                        <i className="bi bi-plus-circle me-2"></i> Add
+                    </button>
+                </form>
+            );
+        }
+
+        function TaskItem({ item, index, handleToggleComplete, handleEdit, handleAddSubtask, handleDelete, handleDeleteSubtask, handleSelectTask, isActive }) {
+            return (
+                <div className={`task-item ${isActive ? "task-active" : ""}`} onClick={() => handleSelectTask(index)}>
+                    <div className="d-flex align-items-center">
+                        <input
+                            type="checkbox"
+                            className="form-check-input me-2"
+                            checked={item.completed}
+                            onChange={(e) => { e.stopPropagation(); handleToggleComplete(index); }}
+                        />
+                        <span className={item.completed ? "text-decoration-line-through" : ""}>{item.text}</span>
+                    </div>
+                    <div className="task-actions">
+                        <button onClick={(e) => { e.stopPropagation(); handleEdit(index); }} className="btn btn-warning btn-sm d-flex align-items-center">
+                            <i className="bi bi-pencil-square me-1"></i> Edit
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); handleAddSubtask(index); }} className="btn btn-success btn-sm d-flex align-items-center">
+                            <i className="bi bi-plus-square me-1"></i> Add Subtask
+                        </button>
+                    </div>
+                    <button onClick={(e) => { e.stopPropagation(); handleDelete(index); }} className="btn task-delete btn-sm d-flex align-items-center">
+                        <i className="bi bi-trash me-1"></i> Delete
+                    </button>
+
+                    {item.subtasks.length > 0 && (
+                        <div className="task-subtasks">
+                            {item.subtasks.map((subtask, subIndex) => (
+                                <div key={subIndex} className="task-subtask-item">
+                                    <span>{subtask}</span>
+                                    <span className="task-subtask-delete" onClick={(e) => { e.stopPropagation(); handleDeleteSubtask(index, subIndex); }}>
+                                        <i className="bi bi-x-circle"></i>
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        function TodoApp() {
+            const [activity, setActivity] = React.useState("");
+            const [lists, setLists] = React.useState([]);
+            const [activeTask, setActiveTask] = React.useState(null);
+
+            function handleChange(e) {
+                setActivity(e.target.value);
+            }
+
+            function handleSubmit(e) {
+                e.preventDefault();
+                if (activity.trim()) {
+                    setLists([...lists, { text: activity, subtasks: [], completed: false }]);
+                    setActivity("");
+                }
+            }
+
+            function handleToggleComplete(index) {
+                const newList = lists.map((item, i) => i === index ? { ...item, completed: !item.completed } : item);
+                setLists(newList);
+            }
+
+            function handleEdit(index) {
+                const newActivity = prompt("Edit aktivitas:", lists[index].text);
+                if (newActivity !== null && newActivity.trim()) {
+                    const newList = lists.map((item, i) => i === index ? { ...item, text: newActivity } : item);
+                    setLists(newList);
+                }
+            }
+
+            function handleAddSubtask(index) {
+                const subtask = prompt("Tambahkan subtask:");
+                if (subtask) {
+                    const newList = lists.map((item, i) => i === index ? { ...item, subtasks: [...item.subtasks, subtask] } : item);
+                    setLists(newList);
+                }
+            }
+
+            function handleDeleteSubtask(taskIndex, subtaskIndex) {
+                const newList = lists.map((item, i) => {
+                    if (i === taskIndex) {
+                        const newSubtasks = item.subtasks.filter((_, j) => j !== subtaskIndex);
+                        return { ...item, subtasks: newSubtasks };
+                    }
+                    return item;
+                });
+                setLists(newList);
+            }
+
+            function handleDelete(index) {
+                if (window.confirm("Apakah Anda yakin ingin menghapus tugas ini?")) {
+                    setLists(lists.filter((_, i) => i !== index));
+                }
+            }
+
+            function handleSelectTask(index) {
+                setActiveTask(index === activeTask ? null : index);
+            }
+
+            return (
+                <div id="todoApp" class="container"> 
+                
+
+                    <h1>Todo List App</h1>
+                    <FormInput handleChange={handleChange} handleSubmit={handleSubmit} activity={activity} />
+                    {lists.length === 0 ? (
+                        <p className="text-muted">Belum ada tugas, tambahkan sekarang!</p>
+                    ) : (
+                        lists.map((item, index) => (
+                            <TaskItem
+                                key={index}
+                                item={item}
+                                index={index}
+                                handleToggleComplete={handleToggleComplete}
+                                handleEdit={handleEdit}
+                                handleAddSubtask={handleAddSubtask}
+                                handleDelete={handleDelete}
+                                handleDeleteSubtask={handleDeleteSubtask}
+                                handleSelectTask={handleSelectTask}
+                                isActive={index === activeTask}
+                            />
+                        ))
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById("app")).render(<TodoApp />);
+    </script>
+</body>
+</html>
